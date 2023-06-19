@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id            Int       @id @default(autoincrement())
+  name          String
+  cpf           String
+  email         String    @unique
+  password      String
+  external_code String?
+  token         String?
+  profile       Profiles? @relation(fields: [profilesId], references: [id])
+  profilesId    Int?
+}
+
+model Profiles {
+  id              Int           @id @default(autoincrement())
+  description     String
+  profilescol     String
+  profile_type_id Int           @unique
+  profile_type    ProfilesTypes @relation(fields: [profile_type_id], references: [id])
+  Users           Users[]
+}
+
+model ProfilesTypes {
+  id          Int       @id @default(autoincrement())
+  description String
+  Profiles    Profiles?
+}
+
+model Checklist {
+  id                 Int                  @id @default(autoincrement())
+  description        String
+  active             Boolean
+  schedule_id        Int
+  checklist_types    ChecklistTypes       @relation(fields: [checklist_type_id], references: [id])
+  checklist_type_id  Int
+  code               String
+  ChecklistQuestions ChecklistQuestions[]
+  QueueExecChecklist QueueExecChecklist[]
+}
+
+model ChecklistQuestions {
+  id                Int                @id @default(autoincrement())
+  description       String
+  order             Int
+  active            Boolean
+  checklist         Checklist          @relation(fields: [checklist_id], references: [id])
+  checklist_id      Int
+  answer_request    Boolean
+  answer_correct_id Int
+  ChecklistAnswers  ChecklistAnswers[]
+  ExecChecklist     ExecChecklist[]
+}
+
+model ChecklistAnswers {
+  id                     Int                      @id @default(autoincrement())
+  description            String
+  checklist_question     ChecklistQuestions       @relation(fields: [checklist_question_id], references: [id])
+  checklist_question_id  Int
+  correct                Boolean
+  checklist_answer_type  answers_type
+  ChecklistAnswersValues ChecklistAnswersValues[]
+  ExecChecklist          ExecChecklist[]
+}
+
+enum answers_type {
+  RADIO
+  MULTIPLE
+  PHOTO
+  TEXTAREA
+}
+
+model ChecklistAnswersValues {
+  id                  Int                   @id @default(autoincrement())
+  description         String
+  value               String
+  checklist_answer    ChecklistAnswers      @relation(fields: [checklist_answer_id], references: [id])
+  checklist_answer_id Int
+  ExecChecklistValues ExecChecklistValues[]
+}
+
+model ExecChecklist {
+  id                      Int                @id @default(autoincrement())
+  checklist_question      ChecklistQuestions @relation(fields: [checklist_question_id], references: [id])
+  checklist_question_id   Int
+  checklist_answer        ChecklistAnswers   @relation(fields: [checklist_answer_id], references: [id])
+  checklist_answer_id     Int
+  user_id                 Int
+  data_executate          DateTime           @default(now())
+  comments                String
+  queue_exec_checklist    QueueExecChecklist @relation(fields: [queue_exec_checklist_id], references: [id])
+  queue_exec_checklist_id Int
+  Attachments             Attachments[]
+}
+
+model QueueExecChecklist {
+  id                 Int                  @id @default(autoincrement())
+  checklist          Checklist            @relation(fields: [checklist_id], references: [id])
+  checklist_id       Int
+  date_start         DateTime             @default(now())
+  date_end           DateTime
+  QueueChecklistTags QueueChecklistTags[]
+  ExecChecklist      ExecChecklist[]
+}
+
+model QueueChecklistTags {
+  id                      Int                @id @default(autoincrement())
+  name                    String
+  queue_exec_checklist    QueueExecChecklist @relation(fields: [queue_exec_checklist_id], references: [id])
+  queue_exec_checklist_id Int
+}
+
+model ExecChecklistValues {
+  id                        Int                    @id @default(autoincrement())
+  checklist_answer_value    ChecklistAnswersValues @relation(fields: [checklist_answer_value_id], references: [id])
+  checklist_answer_value_id Int
+
+  exec_checklist_id Int
+}
+
+model ChecklistTypes {
+  id          Int         @id @default(autoincrement())
+  description String      @unique
+  Checklist   Checklist[]
+}
+
+model Attachments {
+  id                Int           @id @default(autoincrement())
+  name              String
+  path              String
+  type              String
+  size              Int
+  exec_checklist    ExecChecklist @relation(fields: [exec_checklist_id], references: [id])
+  exec_checklist_id Int
+}
