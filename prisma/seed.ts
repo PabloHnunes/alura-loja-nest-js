@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 async function main() {
   const pablo = await prisma.users.upsert({
     where: {
-      email: 'pablo.nunes@tecadi.com.br',
+      email: 'teste@tecadi.com.br',
     },
     update: {},
     create: {
