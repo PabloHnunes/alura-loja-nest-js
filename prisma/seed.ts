@@ -7,9 +7,9 @@ async function main() {
     },
     update: {},
     create: {
-      email: 'pablo.nunes@tecadi.com.br',
+      email: 'teste@tecadi.com.br',
       name: 'Pablo HH Nunes',
-      cpf: '08055745900',
+      cpf: '',
       password: '123456',
       profile: {
         create: {
